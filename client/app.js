@@ -20,7 +20,8 @@ function login(){
     loginForm.classList.remove('show');
     messagesList.classList.add('show');
     messagesSection.classList.add('show');
-  }else alert('PANIE ERROR WPISAJ COŚ TU');
+    socket.emit('login', userName);
+  }else alert('Type login, Sir!');
 }
 
 addMessageForm.addEventListener('submit', (e) => {
@@ -30,7 +31,7 @@ addMessageForm.addEventListener('submit', (e) => {
 
 function sendMessage(){
   if(!messageContentInput.value){
-    alert('PANIE ERROR WPISAJ COŚ TU');
+    alert('You Shoud Type a message');
   }else{
     addMessage(userName, messageContentInput.value);
     socket.emit('message', {author: userName, content: messageContentInput.value});
@@ -51,6 +52,25 @@ function addMessage(user, content){
   messagesList.appendChild(message);
 }
 
-// WEB SOCKET
+function botMessage(user, type){
+  console.log(type)
+  const message = document.createElement('li');
+  message.className = 'message--bot';
+  if( type === 'login'){
+    message.innerHTML = `
+    <h3 class="message__author">Bot Chat</h3>
+    <div class="message__content">New Player arrived, say Hey to ${user}</div>`;
+  }
+  if( type === 'logout'){
+    message.innerHTML = `
+    <h3 class="message__author">Bot Chat</h3>
+    <div class="message__content">${user} Disconected</div>`;
+  }
 
+  messagesList.appendChild(message);
+};
+
+// WEB SOCKET LISTENER
 socket.on('message', ({author, content}) => addMessage(author, content));
+socket.on('login', (user) => botMessage(user, 'login'));
+socket.on('logout', (user) => botMessage(user, 'logout'));

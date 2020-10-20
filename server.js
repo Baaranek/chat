@@ -7,6 +7,7 @@ const app = express();
 app.use(express.static(path.join(__dirname, '/client')));
 
 let messageList = [];
+let userName = [];
 
 app.get('*', (req,res) => {
   res.sendFile(path.join(__dirname, '/client/index.html'));
@@ -24,4 +25,17 @@ io.on('connection', (socket) => {
     messageList.push(message);
     socket.broadcast.emit('message', message);
   });
-})
+  socket.on('login', (login) => {
+    Id = socket.id;
+    userName.push({Id, login});
+    socket.broadcast.emit('login', login);
+    }
+  );
+  socket.on('disconnect', (disconnect) => {
+    userId = userName.find( user => user.Id == socket.id);
+    userLoginName = userId.login;
+    userIndex = userName.indexOf(userId);
+    userName.splice(userIndex);
+    socket.broadcast.emit('logout', userLoginName);
+  });
+});
