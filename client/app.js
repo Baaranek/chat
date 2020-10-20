@@ -1,3 +1,5 @@
+const socket = io();
+
 const loginForm = document.getElementById('welcome-form');
 const messagesSection = document.getElementById('messages-section'); 
 const messagesList = document.getElementById('messages-list');
@@ -29,15 +31,17 @@ addMessageForm.addEventListener('submit', (e) => {
 function sendMessage(){
   if(!messageContentInput.value){
     alert('PANIE ERROR WPISAJ COŚ TU');
-  }else
-  addMessage(userName, messageContentInput.value);
-  messageContentInput.value = '';
+  }else{
+    addMessage(userName, messageContentInput.value);
+    socket.emit('message', {author: userName, content: messageContentInput.value});
+    messageContentInput.value = '';
+  }
 };
 
 function addMessage(user, content){
   const message = document.createElement('li');
   message.className = 'message message--received';
-  userName ? message.classList.add('message--self') : null;
+  user === userName ? message.classList.add('message--self') : null;
 
   message.innerHTML = `
   <h3 class="message__author">${user === userName ? 'You' : user}</h3>
@@ -46,3 +50,7 @@ function addMessage(user, content){
 
   messagesList.appendChild(message);
 }
+
+// WEB SOCKET
+
+socket.on('message', ({author, content}) => addMessage(author, content));
